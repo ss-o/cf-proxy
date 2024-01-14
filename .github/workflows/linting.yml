@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - main
       - dev
   pull_request:
 
@@ -50,7 +51,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 'lts/**'
           cache: 'pnpm'
       
       - name: Install pnpm packages
