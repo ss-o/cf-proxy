@@ -2,7 +2,7 @@ import { getBodyBuffer } from '@/utils/body';
 import {
   getProxyHeaders,
   getAfterResponseHeaders,
-  cleanupHeadersBeforeProxy,
+  getBlacklistedHeaders,
 } from '@/utils/headers';
 import {
   createTokenIfNeeded,
@@ -21,7 +21,9 @@ export default defineEventHandler(async (event) => {
       event,
       status: 200,
       data: {
-        message: 'Proxy is working as expected',
+        message: `Proxy is working as expected (v${
+          useRuntimeConfig(event).version
+        })`,
       },
     });
 
@@ -39,17 +41,22 @@ export default defineEventHandler(async (event) => {
   const token = await createTokenIfNeeded(event);
 
   // proxy
-  cleanupHeadersBeforeProxy(event);
-  await proxyRequest(event, destination, {
-    fetchOptions: {
-      redirect: 'follow',
-      headers: getProxyHeaders(event.headers),
-      body,
-    },
-    onResponse(outputEvent, response) {
-      const headers = getAfterResponseHeaders(response.headers, response.url);
-      setResponseHeaders(outputEvent, headers);
-      if (token) setTokenHeader(event, token);
-    },
-  });
+  try {
+    await specificProxyRequest(event, destination, {
+      blacklistedHeaders: getBlacklistedHeaders(),
+      fetchOptions: {
+        redirect: 'follow',
+        headers: getProxyHeaders(event.headers),
+        body,
+      },
+      onResponse(outputEvent, response) {
+        const headers = getAfterResponseHeaders(response.headers, response.url);
+        setResponseHeaders(outputEvent, headers);
+        if (token) setTokenHeader(event, token);
+      },
+    });
+  } catch (e) {
+    console.log('Error fetching', e);
+    throw e;
+  }
 });
