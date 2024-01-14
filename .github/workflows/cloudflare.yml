@@ -4,7 +4,8 @@ name: Deploy Worker
 # repository_dispatch is triggered by CF
 # secrets should also be made by CF
 
-on: ["repository_dispatch"]
+on:
+  repository_dispatch:
 
 jobs:
   deploy:
@@ -12,7 +13,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
-        
+
       - uses: pnpm/action-setup@v2
         with:
           version: latest
