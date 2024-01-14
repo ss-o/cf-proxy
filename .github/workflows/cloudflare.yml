@@ -1,11 +1,12 @@
 name: Deploy Worker
 
-# this action is for the "deploy to cloudflare" button
+# This action is for the "deploy to cloudflare" button
 # repository_dispatch is triggered by CF
-# secrets should also be made by CF
+# Secrets should also be made by CF
 
 on:
   repository_dispatch:
+  workflow_dispatch:
 
 jobs:
   deploy:
